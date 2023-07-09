@@ -2,7 +2,7 @@
 #include <kernel/stat.h>
 #include <user/user.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
     int x;
     if (argc != 2) {
         fprintf(2, "Usage: sleep...\n");
@@ -14,6 +14,6 @@ int main(int argc, char** argv) {
         exit(1);
     }
     sleep(x);
-    
+
     exit(0);
 }
