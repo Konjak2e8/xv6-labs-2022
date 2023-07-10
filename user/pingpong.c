@@ -1,12 +1,22 @@
 #include <kernel/defs.h>
 #include <user/user.h>
-char buf;
 int main(int argv, char **argc) {
-    int p[2];
-    pipe(p);
-    int son_pid = fork();
-    if (pid > 0) {
-        close(p[0]);
-        if (write(p[1], buf, sizeof(buf)) > 0)
+    char buf;
+    int p1[2], p2[2];
+    pipe(p1);
+    pipe(p2);
+    if (fork() == 0) {
+        if (read(p1[0], buf, 1)) {
+            fprintf(2, "%d: received ping\n", getpid());
+            write(p2[1], "p", 1);
+            exit(0);
+        }
     }
+    else {
+        write(p1[1], buf, 1);
+        if (read(p2[0], buf, 1)) {
+            fprintf(1, "%d: received pong\n", getpid());
+        }
+    }
+    exit(0);
 }
