@@ -1,7 +1,8 @@
-#include <kernel/defs.h>
+#include <kernel/types.h>
+#include <kernel/stat.h>
 #include <user/user.h>
 int main(int argv, char **argc) {
-    char buf;
+    char buf[10];
     int p1[2], p2[2];
     pipe(p1);
     pipe(p2);
