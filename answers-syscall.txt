@@ -1,0 +1,10 @@
+usertrap()
+7
+SYS_exec
+User Mode
+lw a3,0(zero)
+a3
+'cause the kernel loaded the data at address 0 which is unused.
+initcode
+1
+
