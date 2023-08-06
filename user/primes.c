@@ -35,7 +35,6 @@ void pipline(int rp) {
         }
         close(ppl[1]);
         wait(0); // 等待子进程返回
-        exit(0); // 进程退出
     }
 }
 
@@ -46,7 +45,6 @@ int main(int argc, char const *argv[]) {
     if (fork() == 0) {  // 开始pipline
         close(p[1]);    // 关闭写端
         pipline(p[0]);  // 将父进程创建的管道的读端作为参数传给子进程进行读取
-        exit(0);
     } else {            // 主进程生成数字2-35
         close(p[0]);    // 关闭读端
         int i;
@@ -54,6 +52,6 @@ int main(int argc, char const *argv[]) {
             write(p[1], &i, sizeof(int));
         close(p[1]);
         wait(0);  // 等待子进程返回
-        exit(0);
     }
+    exit(0);
 }
