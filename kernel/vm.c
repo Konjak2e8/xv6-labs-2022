@@ -447,7 +447,8 @@ void vmprint(pagetable_t pagetable) {
   for(int i = 0; i < 512; i++) {
     pte_t pte = pagetable[i];
     if(pte & PTE_V) {
-      for (int j = 0; j < printdepth; j++) {
+      for (int j = 0; j <= printdepth; j++) {
+        if (j > 0) printf(" ");
         printf("..");
       }
       printf("%d: pte %p pa %p\n", i, (uint64)pte, (uint64)PTE2PA(pte));
