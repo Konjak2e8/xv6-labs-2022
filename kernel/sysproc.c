@@ -101,7 +101,9 @@ sys_pgaccess(void)
     }
     count++;
   }
-  copyout(p->pagetable,useraddr,(char*)&bitmap,sizeof(bitmap));
+  if (copyout(p->pagetable,useraddr,(char*)&bitmap,sizeof(bitmap)) < 0)
+    return -1;
+  return 0;
 }
 #endif
 
