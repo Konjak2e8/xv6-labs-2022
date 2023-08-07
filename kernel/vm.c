@@ -439,26 +439,33 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 }
 
 void vmprint(pagetable_t pagetable) {
-  static int printdepth = 0;
-  if (printdepth == 0) {
+  static int depth = 0;
+  if (depth == 0) {
     printf("page table %p\n", (uint64)pagetable);
   }
-  // there are 2^9 = 512 PTEs in a page table.
-  for(int i = 0; i < 512; i++) {
-    pte_t pte = pagetable[i];
-    if(pte & PTE_V) {
-      for (int j = 0; j <= printdepth; j++) {
-        if (j > 0) printf(" ");
-        printf("..");
+  // 2^9 = 512 PTEs per page table
+  if (depth != 3) {
+    for (int i = 0; i < 512; i++) {
+      pte_t pte = pagetable[i];
+      if (pte & PTE_V) {
+        // this PTE points to a lower-level page table.
+        uint64 child = PTE2PA(pte);
+        if (depth == 0) {
+          printf("..");
+        }
+        else if (depth == 1) {
+          printf(".. ..");
+        }
+        else if (depth == 2) {
+          printf(".. .. ..");
+        }
+        printf("%d: pte %p pa %p\n", i, pte, child);
+        depth++;
+        vmprint((pagetable_t)child);
+        depth--;
       }
-      printf("%d: pte %p pa %p\n", i, (uint64)pte, (uint64)PTE2PA(pte));
-    }
-    // iterate to lower-level page table
-    if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
-      printdepth++;
-      uint64 child_pa = PTE2PA(pte);
-      vmprint((pagetable_t)child_pa);
-      printdepth--;
     }
   }
+  
+  return;
 }
