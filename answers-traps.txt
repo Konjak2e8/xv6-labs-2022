@@ -1,0 +1,6 @@
+1. a0~a7; a2 stores 13.
+2. the compiler optimizes the call of f and g.
+3. 0x642.
+4. 0x38.
+5. He110 World.
+6. x=3 y=-170346848; the value of y is uncertain because the register gets only 1 value from input and it reads the value of a2 for y.
