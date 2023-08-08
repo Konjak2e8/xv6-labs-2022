@@ -103,7 +103,7 @@ sys_sigalarm(void)
   struct proc *p = myproc();
   p->ticks = ticks;
   p->handler = handler;
-  p->ticks_cnt = 0;
+  p->is_return = 1;
   return 0;
 }
 
