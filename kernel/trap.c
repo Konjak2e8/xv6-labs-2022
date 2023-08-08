@@ -29,12 +29,6 @@ trapinithart(void)
   w_stvec((uint64)kernelvec);
 }
 
-void
-store_val()
-{
-
-}
-
 //
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
