@@ -107,5 +107,6 @@ struct proc {
 
   int ticks;
   int ticks_cnt;
+  uint64 org_epc; // saves the value of proc->epc in sigalarm
   uint64 handler;
 };
