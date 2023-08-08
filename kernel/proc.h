@@ -109,5 +109,5 @@ struct proc {
   int ticks_cnt;
   uint64 handler;
   struct trapframe saved_tf; // saves the values of trapframe in sigalarm
-  bool is_return;
+  int is_return;
 };
