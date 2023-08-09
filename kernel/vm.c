@@ -385,6 +385,8 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
       char *mem = kalloc();
       if (mem == 0) {
         p->killed = 1;
+      }
+      else {
         memmove(mem, (char*)pa0, PGSIZE);
         uint flags = PTE_FLAGS(*pte);
         uvmunmap(pagetable, va0, 1, 1);
