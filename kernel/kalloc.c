@@ -56,10 +56,11 @@ kfree(void *pa)
     panic("kfree");
 
   acquire(&ref_count_lock);
-  if (--useReference[(uint64)pa / PGSIZE] > 0)
-    return;
+  useReference[(uint64)pa/PGSIZE] --;
+  int temp = useReference[(uint64)pa/PGSIZE];
   release(&ref_count_lock);
-
+  if (temp > 0)
+    return;
   // Fill with junk to catch dangling refs.
   memset(pa, 1, PGSIZE);
 
