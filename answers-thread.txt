@@ -1,0 +1,1 @@
+For keys with 2 threads, the 2 threads work asynchronously, assume that they are thread1 and thread2, when thread1 tries to add a key key1 to the bucket, the CPU may switch to thread2 to add another key key2, after that, it switches back to thread1, who doesn't realize the existence of key2 and still inserts key1. This makes key2 unreadable.
