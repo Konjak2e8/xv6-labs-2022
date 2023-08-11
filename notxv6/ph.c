@@ -107,6 +107,9 @@ main(int argc, char *argv[])
   void *value;
   double t1, t0;
 
+  for (int i = 0; i < NBUCKET; i++) {
+    pthread_mutex_init(&locks[i], NULL);
+  }
 
   if (argc < 2) {
     fprintf(stderr, "Usage: %s nthreads\n", argv[0]);
