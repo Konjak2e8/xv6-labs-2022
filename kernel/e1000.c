@@ -134,6 +134,18 @@ e1000_recv(void)
   // Check for packets that have arrived from the e1000
   // Create and deliver an mbuf for each packet (using net_rx()).
   //
+  uint reg_rdt = regs[E1000_RDT];
+  int nxt_idx = (reg_rdt + 1) % RX_RING_SIZE;
+  while(rx_ring[nxt_idx].status & E1000_RXD_STAT_DD){
+      rx_mbufs[nxt_idx]->len = rx_ring[nxt_idx].length;
+      net_rx(rx_mbufs[nxt_idx]);
+      if((rx_mbufs[nxt_idx] = mbufalloc(0)) == 0)
+          panic("e1000");
+      rx_ring[nxt_idx].addr = (uint64)rx_mbufs[nxt_idx]->head;
+      rx_ring[nxt_idx].status = 0;
+      nxt_idx = (nxt_idx + 1) % RX_RING_SIZE;
+  }
+  regs[E1000_RDT] = (nxt_idx - 1) % RX_RING_SIZE;
 }
 
 void
