@@ -242,7 +242,7 @@ bad:
   return -1;
 }
 
-static struct inode*
+struct inode*
 create(char *path, short type, short major, short minor)
 {
   struct inode *ip, *dp;
@@ -362,6 +362,30 @@ sys_open(void)
 
   if((omode & O_TRUNC) && ip->type == T_FILE){
     itrunc(ip);
+  }
+
+  if (ip->type == T_SYMLINK && !(omode & O_NOFOLLOW)) {
+    int tolerate = 10;
+    while (ip->type == T_SYMLINK && tolerate > 0) {
+      if(readi(ip, 0, (uint64)path, 0, ip->size) != ip->size) {
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+      iunlockput(ip);
+      if((ip = namei(path)) == 0) {
+        end_op();
+        return -1;
+      }
+      ilock(ip);
+      tolerate--;
+    }
+    // cycle symlink is not allowed
+    if (tolerate == 0) {
+      iunlockput(ip);
+      end_op();
+      return -1;
+    }
   }
 
   iunlock(ip);

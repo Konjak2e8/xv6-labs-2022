@@ -7,6 +7,9 @@
 #include "proc.h"
 #include "stat.h"
 
+extern struct inode*
+create(char *path, short type, short major, short minor);
+
 uint64
 sys_exit(void)
 {
