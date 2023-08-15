@@ -158,6 +158,13 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
 
+  struct vma *tmp = p->vma;
+  while (tmp) {
+    tmp->len = 0;
+    tmp->flag = 0;
+    tmp = tmp->next;
+  }
+
   return p;
 }
 
@@ -340,7 +347,7 @@ fork(void)
     vma_copy(new_v, v);
     filedup(new_v->file);
     new_v->next = 0;
-    if (v == 0) {
+    if (pre == 0) {
       np->vma = new_v;
     } else {
       pre->next = new_v;
