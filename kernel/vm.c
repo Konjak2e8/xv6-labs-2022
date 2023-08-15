@@ -479,3 +479,37 @@ mmap_handler(uint64 va, int scause)
   iunlock(f->ip);
   return 0;
 }
+
+void
+writeback(struct vma* v, uint64 addr, int n)
+{
+   // no need to writeback
+  if (!(v->permission & PTE_W) || (v->flag & MAP_PRIVATE)) {
+    return;
+  }
+
+  if ((addr % PGSIZE) != 0) {
+    panic("unmap: not aligned");
+  }
+
+  printf("starting writeback: %p %d\n", addr, n);
+
+  struct file* f = v->file;
+
+  // writeback all pages to the file
+  int max = ((MAXOPBLOCKS-1-1-2) / 2) * BSIZE;
+  int i = 0;
+  while(i < n){
+    int n1 = n - i;
+    if(n1 > max)
+      n1 = max;
+
+    begin_op();
+    ilock(f->ip);
+    printf("%p %d %d\n",addr + i, v->off + v->start - addr, n1);
+    int r = writei(f->ip, 1, addr + i, v->off + v->start - addr + i, n1);
+    iunlock(f->ip);
+    end_op();
+    i += r;
+  }
+}
