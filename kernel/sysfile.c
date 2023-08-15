@@ -503,3 +503,66 @@ sys_pipe(void)
   }
   return 0;
 }
+
+uint64
+sys_mmap(void)
+{
+  uint64 addr;
+  int len, prot, flag, fd, offset;
+  argaddr(0, &addr);
+  argint(1, &len);
+  argint(2, &prot);
+  argint(3, &flag);
+  argint(4, &fd);
+  argint(5, &offset);
+
+  if(addr != 0)
+    panic("mmap: addr not 0");
+  if(offset != 0)
+    panic("mmap: offset not 0");
+
+  struct proc *p = myproc();
+  struct file* f = p->ofile[fd];
+
+  int pte_flag = PTE_U;
+
+  if (prot & PROT_WRITE) {
+    if(!f->writable && !(flag & MAP_PRIVATE)) return -1; // map to a unwritable file with PROT_WRITE
+    pte_flag |= PTE_W;
+  }
+  if (prot & PROT_READ) {
+    if(!f->readable) return -1; // map to a unreadable file with PROT_READ
+    pte_flag |= PTE_R;
+  }
+
+  struct vma* v = vma_alloc();
+  v->permission = pte_flag;
+  v->len = len;
+  v->off = offset;
+  v->file = myproc()->ofile[fd];
+  v->flag = flag;
+  filedup(f);
+  struct vma* pv = p->vma;
+  if (pv == 0) {
+    v->start = VMA_START;
+    v->end = v->start + len;
+    p->vma = v;
+  } else {
+    while (pv->next) pv = pv->next;
+    v->start = PGROUNDUP(pv->end);
+    v->end = v->start + len;
+    pv->next = v;
+    v->next = 0;
+  }
+  addr = v->start;
+  printf("mmap: [%p, %p)\n", addr, v->end);
+
+  release(&v->lock);
+  return addr;
+}
+
+uint64
+sys_munmap(void)
+{
+  
+}
