@@ -322,6 +322,23 @@ fork(void)
   np->state = RUNNABLE;
   release(&np->lock);
 
+  np->vma = 0;
+  struct vma *v = p->vma, *pre = 0;
+  while (v) {
+    struct vma* new_v = vma_alloc();
+    vma_copy(new_v, v);
+    filedup(new_v->file);
+    new_v->next = 0;
+    if (v == 0) {
+      np->vma = new_v;
+    } else {
+      pre->next = new_v;
+    }
+    pre = new_v;
+    release(&new_v->lock);
+    v = v->next;
+  }
+
   return pid;
 }
 
@@ -350,6 +367,20 @@ exit(int status)
 
   if(p == initproc)
     panic("init exiting");
+
+  // mun map all mmap vma
+  struct vma *v = p->vma, *pre;
+  while(v) {
+    writeback(v, v->start, v->len);
+    uvmunmap(p->pagetable, v->start, PGROUNDUP(v->len) / PGSIZE, 1);
+    fileclose(v->file);
+    pre = v->next;
+    acquire(&v->lock);
+    v->next = 0;
+    v->len = 0;
+    release(&v->lock);
+    v = pre;
+  }
 
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){
