@@ -12,6 +12,8 @@ struct proc proc[NPROC];
 
 struct proc *initproc;
 
+struct vma vma_list[NVMA];
+
 int nextpid = 1;
 struct spinlock pid_lock;
 
@@ -370,7 +372,7 @@ exit(int status)
 
   // mun map all mmap vma
   struct vma *v = p->vma, *pre;
-  while(v) {
+  while (v) {
     writeback(v, v->start, v->len);
     uvmunmap(p->pagetable, v->start, PGROUNDUP(v->len) / PGSIZE, 1);
     fileclose(v->file);
@@ -711,4 +713,16 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+struct vma* vma_alloc() {
+  for (int i = 0; i < NVMA; i++) {
+    acquire(&vma_list[i].lock);
+    if (vma_list[i].len == 0) {
+      return &vma_list[i];
+    } else {
+      release(&vma_list[i].lock);
+    }
+  }
+  panic("no enough vma");
 }
