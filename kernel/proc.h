@@ -98,15 +98,7 @@ struct vma {
   struct spinlock lock;  
 };
 
-void vma_copy(struct vma* dst, const struct vma* src) {
-  dst->start = src->start;
-  dst->end = src->end;
-  dst->len = src->len;
-  dst->off = src->off;
-  dst->permission = src->permission;
-  dst->flag = src->flag;
-  dst->file = src->file;
-};
+void vma_copy(struct vma* dst, const struct vma* src);
 
 // Per-process state
 struct proc {

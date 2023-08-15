@@ -28,6 +28,16 @@ extern char trampoline[]; // trampoline.S
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
+void vma_copy(struct vma* dst, const struct vma* src) {
+  dst->start = src->start;
+  dst->end = src->end;
+  dst->len = src->len;
+  dst->off = src->off;
+  dst->permission = src->permission;
+  dst->flag = src->flag;
+  dst->file = src->file;
+};
+
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
