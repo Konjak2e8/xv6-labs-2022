@@ -332,9 +332,8 @@ fork(void)
 
   acquire(&np->lock);
   np->state = RUNNABLE;
-  release(&np->lock);
 
-  np->vma = 0;
+  np->vma = 0; 
   struct vma *v = p->vma, *pre = 0;
   while (v) {
     struct vma* new_v = vma_alloc();
@@ -350,6 +349,8 @@ fork(void)
     release(&new_v->lock);
     v = v->next;
   }
+
+  release(&np->lock);
 
   return pid;
 }
