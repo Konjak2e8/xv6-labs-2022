@@ -564,5 +564,48 @@ sys_mmap(void)
 uint64
 sys_munmap(void)
 {
+  uint64 addr;
+  int length;
+  argaddr(0, &addr);
+  argint(1, &length);
+  struct proc *p = myproc();
+  struct vma *v = p->vma;
+  struct vma *pre = 0;
+  while (v != 0) {
+    if(addr >= v->start && addr < v->end) break; // addr found
+    pre = v;
+    v = v->next;
+  }
+  if (v == 0) { // not mapped
+    return -1;
+  } 
+  printf("munmap: %p %d\n", addr, length);
+  if (addr != v->start && addr + length != v->end) {
+    panic("munmap middle of vma");
+  } 
+  if (addr == v->start) {
+    writeback(v, addr, length);
+    uvmunmap(p->pagetable, addr, length / PGSIZE, 1);
+    if (length == v->len) {
+      // free all
+      fileclose(v->file);
+      if(pre == 0){
+        p->vma = v->next; // head
+      } else {
+        pre->next = v->next;
+        v->next = 0;
+      }
+      acquire(&v->lock);
+      v->len = 0;
+      release(&v->lock);
+    } else { // free head
+      v->start -= length;
+      v->off += length;
+      v->len -= length;
+    }
+  } else {// free tail
+    v->len -= length;
+    v->end -= length;
+  }
   return 0;
 }
