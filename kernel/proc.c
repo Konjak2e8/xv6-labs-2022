@@ -388,7 +388,7 @@ exit(int status)
   if(p == initproc)
     panic("init exiting");
 
-  // mun map all mmap vma
+  // munmap all mmap vma
   struct vma *v = p->vma, *pre;
   while (v) {
     writeback(v, v->start, v->len);
