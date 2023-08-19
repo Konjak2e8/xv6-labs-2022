@@ -107,7 +107,8 @@ e1000_transmit(struct mbuf *m)
   uint reg_tdt = regs[E1000_TDT]; // 
   
   if((tx_ring[reg_tdt].status & E1000_TXD_STAT_DD) == 0) { // check the TX ring register of the next dataframe && check if the the ring is overflowing
-      return -1;
+    release(&e1000_lock);
+    return -1;
   }
   if(tx_mbufs[reg_tdt]) { // free the last mbuf that was transmitted from that descriptor
     mbuffree(tx_mbufs[reg_tdt]);
@@ -117,10 +118,9 @@ e1000_transmit(struct mbuf *m)
   tx_mbufs[reg_tdt] = m;
   tx_ring[reg_tdt].length = m->len;
   tx_ring[reg_tdt].addr = (uint64)(m->head);
-  tx_ring[reg_tdt].cmd = 9;
+  tx_ring[reg_tdt].cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;
 
   regs[E1000_TDT] = (regs[E1000_TDT] + 1) % TX_RING_SIZE; // update the ring position
-
   release(&e1000_lock);
   return 0;
 }
